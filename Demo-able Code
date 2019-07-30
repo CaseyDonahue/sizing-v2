@@ -1,0 +1,149 @@
+import math
+import pandas as pd
+import matplotlib.pyplot as plt
+#%matplotlib inline
+import numpy as np
+from sklearn.cluster import KMeans
+from numpy import genfromtxt
+
+import csv
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.spatial.distance import pdist, squareform
+
+#Reads all values from ANSUR into a CSV as floats
+data_path = '/Users/caseydonahue/Desktop/kmeans_ansur_testing.csv'
+with open(data_path, 'r') as f:
+    reader = csv.reader(f, delimiter=',')
+    # get header from first row
+    headers = next(reader)
+    # get all the rows as a list
+    data = (list(reader))
+    # transform data into numpy array
+    data = np.array(data).astype(float)
+#    print data
+
+
+#Reads Client Input data into a CSV as floats
+data_path = '/Users/caseydonahue/Desktop/clientinputs.csv'
+with open(data_path, 'r') as f:
+    reader = csv.reader(f, delimiter=',')
+    # get header from first row
+    headers = next(reader)
+    # get all the rows as a list
+    clientdata = list(reader)
+    # transform data into numpy array
+    clientdata = np.array(clientdata).astype(float)
+#    print clientdata
+    z = np.size(clientdata,0)
+#    print z
+#    print clientdata[z-1,:]
+    
+#Reads size data from previous reviews into a CSV as floats
+data_path = '/Users/caseydonahue/Desktop/previousreviews.csv'
+with open(data_path, 'r') as f:
+    reader = csv.reader(f, delimiter=',')
+    # get header from first row
+    headers = next(reader)
+    # get all the rows as a list
+    reviews = list(reader)
+    # transform data into numpy array
+    reviews = np.array(reviews).astype(float)
+#    print clientdata
+    y = np.size(reviews,0)
+#    print y
+#    print clientdata[y-1,:]
+    
+    
+hips = clientdata[z-1,0]
+bust = clientdata[z-1,1]
+waist = clientdata[z-1,2]
+height = clientdata[z-1,3]
+weight = clientdata[z-1,4]
+age = clientdata[z-1,5]
+    
+#Use Numpy function to find Euclidean distance between each point and the customer
+#V1: All points at once
+if hips!=0 and bust!=0 and waist!=0 and height!=0 and weight!=0 and age!=0:
+    ds = []
+    a=0
+    while a<1986:
+        distance  = np.linalg.norm(data[a,:] - clientdata[z-1,:])
+        ds.append(distance)
+        a=a+1
+    dmin = (min(ds))
+#    print (dmin)
+    dindex = ds.index(dmin)
+#    print (dindex + 2)
+    print 'closest match from dataset', data[dindex,:]
+
+
+#If any of the values are not entered (0's) calculation will adjust  
+zeros = np.where(clientdata[z-1,:]==0)
+#print zeros[0]
+unknowns = len(zeros)
+#print unknowns
+data2 = data.copy()
+
+if hips==0 or bust==0 or waist==0 or height==0 or weight==0 or age==0:
+    #deletes columns corresponding to the unknown client values
+    b=0
+    while b<(unknowns):
+        emptycolumn = zeros[b]
+        deleted = np.delete(data2, emptycolumn, axis=1)
+        b=b+1
+#        print deleted[0,:]
+    #deletes columns with 0 entered as an unknown value
+    b=0
+    while b<(unknowns):
+        emptycolumn = zeros[b]
+        deletedcd = np.delete(clientdata, emptycolumn, axis=1)
+        b=b+1
+#        print deletedcd[z-1,:]
+    #executes same comparison as above, but does not include missing client values
+    ds2 = []
+    c=0
+    while c<1986:
+        distance = np.linalg.norm(deleted[c,:] - deletedcd[z-1,:])
+        ds2.append(distance)
+        c=c+1
+    dmin = (min(ds2))
+#    print (dmin)
+    dindex = ds2.index(dmin)
+#    print (dindex + 2)
+    print 'closest match from total dataset', data[dindex,:]
+    
+clientdata1 = clientdata[z-1,:]
+for n, i in enumerate(clientdata1):
+    if i == 0:
+        clientdata1[n] = data[dindex,zeros]
+print 'client values with estimated values = ', clientdata1
+
+ds3 = []
+c=0
+while c<1986:
+    distance  = np.linalg.norm(data[c,:] - clientdata1)
+    ds3.append(distance)
+    c=c+1
+dmax = (max(ds3))
+#print (dmax)
+dindex = ds3.index(dmax)
+#print (dindex + 2)
+#print 'farthest match from dataset', data[dindex,:]
+    
+ds2 = []
+b=0
+while b<y:
+    distance  = np.linalg.norm(reviews[b,:] - clientdata1)
+    ds2.append(distance)
+    b=b+1
+dmin = (min(ds2))
+#print (dmin)
+dindex2 = ds2.index(dmin)
+#print 'row number of closest review match = ', (dindex2 + 2)
+print 'closest match from reviews dataset', reviews[dindex2,:]
+
+percentmatch = 1-(dmin/dmax)
+print 'percent body match = ', percentmatch
+
+        
