@@ -8,9 +8,9 @@ The previous version was based on human measurements being generally scaled on a
 
 This version instead takes the available client data and matches it to the most similarly sized individual in a large base dataset and uses their measurements to fill in any misssing data points. For the match to be reasonably accurate, the user needs to input at least three data points out of: hip circumference, waist circumference, bust circumference, height, weight, and age.
 
-###Data Sources
+### Data Sources
 The base dataset in use is the 2012 Anthropometric Survey of US Army Personell (ANSUR). It contains 108 different measurements from 1,986 females enlisted in the United States Army at the time. Since the majority of people only know a basic few, if any, of their measurements, it would have been neither plausible or efficient to set up a system using all 108 parameters. Instead, the data from six rudimentary measurements were pulled and put into use: *buttock cirucmference (mm)* was used as a measurement for hip circumference, *chest circumference (mm)* was used as a measurement for bust, *waist circumference (mm)* was used for waist, as well as the recoreded measurments of height (in), weight (lbs), and age (years). While it could be argued that the US Army does not provide a representative data set, when the values are put into a histogram, it creates a relatively normal shape. Unfortunatly, like almost all bodily measurements, the chart does have to be skewed right because there is a physical limit to how tiny a body part can be that is comparitively small to the limit for how large a body part can be. For reference, below is a histogram of waist circumferences in the dataset:
-![Histogram](https://www.dropbox.com/s/hg4by5twkp0jaa8/waistcircumference.png)
+![Histogram](https://www.dropbox.com/s/hg4by5twkp0jaa8/waistcircumference.png?raw=true)
 Thus, although the data came from a relatively concentrated soucre it can act as a decent starting point and the data set will be able to grow organically each time a user comes armed already knowing all six of their data points.
 
 ### Process
@@ -23,4 +23,5 @@ If a user enters incomplete information, meaning there are zeros in the last row
   
   The percent match is created by comparing the above distance values to the farthest possible distance for the user in question. This is found by comparing the new complete set of datapoints back to the original base set, and this time finding the maximum euclidean distance. This becomes the denominator of a fraction where the numerator is the distance between the current user and the reviewers. This entire fraction represents the difference between the user and the reviewer, so to get the percent match, it is subtracted from 1 like below:
 ![Fraction](https://www.dropbox.com/s/k9s7kodaemgu3hk/Screen%20Shot%202019-07-30%20at%204.25.25%20PM.png?raw=true)
-This equation creates the percent match value presented to the user when the look at that reviewer's picture which is also the last output of the code.
+
+This equation, the last in the code, calculates the percent match between any two users of the platform.
