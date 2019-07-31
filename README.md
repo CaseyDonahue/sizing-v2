@@ -28,3 +28,6 @@ If a user enters incomplete information, meaning there are zeros in the last row
 ![Fraction](https://www.dropbox.com/s/k9s7kodaemgu3hk/Screen%20Shot%202019-07-30%20at%204.25.25%20PM.png?raw=true)
 
 This equation, the last in the code, calculates the percent match between any two users of the platform.
+
+### Alterations to Make Code "Demo-able"
+The version of social sizing uploaded can be run in a single click by not feeding the full client results into a new CSV, and instead just keeping them as an array labeled "clientdata1". To actually put this into use, the CSV would be necessary to save the results for future use so the original version of the code was split into two parts. One that finds the missing values for the entered user data, and a second that actually creates the comparison to any previous reviews.  
