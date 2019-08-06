@@ -38,6 +38,18 @@ with open(data_path, 'r') as f:
     z = np.size(clientdata,0)
 #    print z
 #    print clientdata[z-1,:]
+
+#Reads AnSUR's Calculated Body Type into a CSV as floats
+data_path = '/Users/caseydonahue/Desktop/bodytypeinputs.csv'
+with open(data_path, 'r') as f:
+    reader = csv.reader(f, delimiter=',')
+    # get header from first row
+    headers = next(reader)
+    # get all the rows as a list
+    clientbt = list(reader)
+    # transform data into numpy array
+    clientbt = np.array(clientbt).astype(str)
+    z = np.size(clientbt,0)
     
 #Reads size data from previous reviews into a CSV as floats
 data_path = '/Users/caseydonahue/Desktop/previousreviews.csv'
@@ -61,9 +73,24 @@ waist = clientdata[z-1,2]
 height = clientdata[z-1,3]
 weight = clientdata[z-1,4]
 age = clientdata[z-1,5]
+
+#assigns a bodytype to rach row in the base set, oval was excluded bc of not enough representation so if users choose that option, it will act in the code like rectangle
+bodytypes = []
+a = 0
+while a<4194:
+    if (data[a,2]/data[a,0])<.75:
+        bodytype = 'hourglass'
+    elif (data[a,0]/data[a,1])>1.11:
+        bodytype = 'triangle'
+    elif (data[a,1]/data[a,0])>.99:
+        bodytype = 'invertedtriangle'
+    else:
+        bodytype = 'rectangle'
+    bodytypes.append(bodytype)
+    a = a+1
     
 #Use Numpy function to find Euclidean distance between each point and the customer
-#V1: All points at once
+#V1: All points are entered by customer
 if hips!=0 and bust!=0 and waist!=0 and height!=0 and weight!=0 and age!=0:
     ds = []
     a=0
@@ -85,7 +112,8 @@ unknowns = len(zeros)
 #print unknowns
 data2 = data.copy()
 
-if hips==0 or bust==0 or waist==0 or height==0 or weight==0 or age==0:
+#since three entered datapoints is a requirement, as long as at least one of hips, bust, or waist was entered body type does not need to be used
+if height==0 or weight==0 or age==0:
     #deletes columns corresponding to the unknown client values
     b=0
     while b<(unknowns):
@@ -112,11 +140,45 @@ if hips==0 or bust==0 or waist==0 or height==0 or weight==0 or age==0:
     dindex = ds2.index(dmin)
 #    print (dindex + 2)
     print 'closest match from total dataset', data[dindex,:]
+
+#if user only enters age, weight, and height the program will only match their other measurements with someone of the same bodytype to aid in accuracy
+ if hips==0 and bust==0 and waist==0:
+    b=0
+    while b<(unknowns):
+        emptycolumn = zeros[b]
+        deleted = np.delete(data2, emptycolumn, axis=1)
+        b=b+1
+#        print deleted[0,:]
+    #deletes columns with 0 entered as an unknown value
+    b=0
+    while b<(unknowns):
+        emptycolumn = zeros[b]
+        deletedcd = np.delete(clientdata, emptycolumn, axis=1)
+        b=b+1
+    indices = [i for i, x in enumerate(bodytypes) if x == clientbt[z-1,:]]
+    btnumber = len(indices)
+    indicesarray = np.array(indices)
+    btdata = deleted[indices,:]
+    btdatafull = data[indices,:]
+    btarray = np.array(bodytypes)
+#    print 'btdata', btdata
+    ds4 = []
+    a = 0
+    while a<btnumber:
+        distance = np.linalg.norm(btdata[a,:] - deletedcd[z-1,:])
+        ds4.append(distance)
+        a=a+1
+    dmin2 = (min(ds4))
+    dindex4 = ds4.index(dmin2)
+    btmatch = btdatafull[dindex4,:]
+    print 'closest match from dataset with same bodytype', btmatch
     
+#writes over any zero values in the users entered data with the estimations from the dataset
 clientdata1 = clientdata[z-1,:]
-for n, i in enumerate(clientdata1):
-    if i == 0:
-        clientdata1[n] = data[dindex,zeros]
+if hips==0 and bust==0 and waist==0:
+    clientdata1[zeros]=btdatafull[dindex4,zeros]
+elif age==0 or weight==0 or height==0:
+    clientdata1[zeros]=data[dindex,zeros]
 print 'client values with estimated values = ', clientdata1
 
 ds3 = []
